@@ -1,0 +1,428 @@
+---
+title: "STAT 2450 Assignment 3 (40 points) "
+author: "Tasneem Hoque"
+date: 'Banner:  B00841761'
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+## Problem 1 (5 pts)
+
+In this problem, we will manipulate unit conversion formulas.  We will assume that:
+
+1 USD = 1.28 CAD
+1 american pint = 0.473 liters
+
+An industry standard beer bottle or beer can is 12 U.S. fluid ounces.  A U.S. pint is equal to 16 U.S. fluid ounces. In other words, the volume of liquid contained in a bottle of beer is equivalent to 3/4 U.S. pints.
+
+Write a function, named 'cpl', that calculates the price of a litre of beer in canadian dollars (CAD), based on the price of a pack of 12 beers in U.S. dollars (USD).
+
+Your function should take two arguments:
+the number of bottle in a pack of beers (nb) and
+the cost in USD of this pack of beer (usd). This way, you will be able to use packs of 6 or packs of 12 bottles of beer.
+
+Your function should return the price, in canadian dollars (CAD) per liter of beer.
+
+
+```{r}
+cpl=function(nb, usd){
+  ppb = nb/usd
+  vpb = 0.75*0.473
+  usdpl = vpb/ppb
+  cadpl= usdpl * 1.28
+  return(cadpl) 
+}
+```
+
+
+
+Now use your function; assume that a pack of 12 beers costs 14.73 USD and let your function display the price in CAD of one liter of beer. 
+
+```{r}
+
+cpl(12,14.73)
+
+```
+
+## Problem 2 (5 points)
+
+In this problem, we want to see if we find a value (root) of x such that:
+
+$$x^3-10x+1=0$$
+We will implement a simple version of the so-called bisection method to find intervals that contain a root.
+
+### 2.1 [2 pts]
+
+write a code that creates a grid (vector) 'x' of regularly spaced values between $x=-5$ and $x=5$ by steps of $0.01$, and computes a vector 'y' of the values of the polynomial at the positions given by x. 
+
+Use x and y to plot (as a line, use type='l') the graph of this cubic function. Call the function 'abline' three times to overlay one horizontal line at $y=0$, and two vertical lines: a red line at $x=-2$ and a blue line at $x=-4$. 
+
+Your plot should clearly show that the graph of the cubic curve crosses the x-axis, $y=0$, somewhere between $x=-4$ and $x=-2$.  Observe that this cubic function takes a negative value at $x=-4$ and a positive value at $x=-2$.
+
+
+```{r}
+x = seq(-5, 5, by = 0.01)
+expand.grid(x)
+
+y <- vector(length=length(x))
+
+for (i in 1:length(x)) {
+  y[i] = x[i]^3 - 10*x[i] + 1
+
+}
+
+expand.grid(y)
+
+```
+
+
+```{r}
+
+plot(x,y)
+abline(h=0)
+abline(v=-2, col='red')
+abline(v=-4, col='blue')
+
+```
+
+
+
+### 2.2 (2 pts)
+
+Write a function called 'findroot' that obeys the following prescriptions:
+
+1. the function has 4 arguments: p,q,a,b
+2. p and q are the coefficients of a cubic polynomial $$f(x)=x^3+px+q$$ of which we want to find a root (real value of x that makes this expression equal to zero).
+3. We want the function to always return the midpoint of the interval $[a,b]$.
+4. We want the function to print the message 'there is a root between a and b', when the signs that the polynomial function takes at $x=a$ and $x=b$ differ (i.e. $f(a)$ and $f(b)$ have different signs).
+
+Therefore, all you have to do is to calculate the values $f(a)$ and $f(b)$ of the polynomial at each end (a or b) of the interval $[a,b]$, and compute the product of these values. If the product is negative, it means that the signs of the polynomial function differ when calculated at a and at b, which implies that the graph of the polynomial is crossing the x axis (i.e. there is a zero or a root inside the interval [a,b]). If this condition is satisfied, then print the message 'there is a root between a and b'. otherwise, print no message.
+
+Make sure that your function always returns the midpoint of the interval $[a,b]$, even if no message is printed.
+
+write the function 'findroot' here:
+
+
+```{r}
+
+findroot=function(p,q,a,b){
+  fa = (a)^3+p*(a)+q
+  fb = (b)^3+p*(b)+q
+  num = fa*fb
+  
+  if(num < 0) {
+    cat("There is a zero or root inside the interval [",a,",",b,"]\n")
+  }
+  return((fa+fb)/2) 
+}
+
+```
+
+
+###  2.3 (1 pt)
+
+Now, let's apply your function to the example above.
+Use your function to answer these questions:
+
+1. is there is a root between -4 and -2 ?
+
+```{r}
+findroot(-10,1,-4,-2)
+```
+
+2. Is there a root between -3.25 and -3.125 ?
+
+```{r}
+findroot(-10,1,-3.25,-3.125)
+```
+
+Note: the bisection method is a robust method that can be used to find the roots of any continuous fonction on a compact (finite and closed) interval $[a,b]$. Feel free (THIS IS NOT a question for THIS assignment) to fully implement the bisection algorithm as a fun exercise.
+
+## Problem 3 (5 pts)
+
+When $x_1, x_2, \ldots , x_n$ is a sample from a normal distribution with unknown mean $\mu$ and unknown variance $\sigma^2$, the level $100(1-\alpha)$% confidence interval for $\mu$ is given by the following formula:
+
+
+$$\bar x \pm t_{1-\alpha/2, n-1} \frac{s}{\sqrt n}$$
+
+where $\bar x$ and $s$ are the sample mean and sample standard deviation of the data, and $t_{1-\alpha/2, n-1}$ cuts off an area $1-\alpha/2$ to its left under the $t$ curve with $n-1$ degrees of freedom.
+
+Write a function which has two arguments, a vector of data $x$, and alpha, which takes any value between 0 and 1, but should have a default value of .05 (hence you must learn how to program functions with default values for their arguments).
+
+The function should return a vector of length 2, which contains the endpoints of the confidence interval.
+
+The percentiles of the t-distribution can be calculated as follows. Suppose that you want the 97.5'th percentile of the t-distribution with 11 degrees of freedom.  This can be calculated in R as
+
+```{r}
+qt(.975,11)
+```
+
+
+```{r}
+# write your function
+conf = function(x,a=0.05) {
+    n= length(x)
+    y = vector(length=2)
+   
+  meanResult = mean(x)
+   stdDev = sd(x)
+   
+   tnx <- qt(1-a/2,n-1)
+   print(tnx)
+   
+   y[1]<-meanResult - tnx*stdDev/sqrt(n)
+   y[2]<-meanResult + tnx*stdDev/sqrt(n)
+   
+   return(y)
+}
+```
+
+
+Test your function by calculating the 98% confidence interval using the following data
+
+```{r}
+set.seed(222)
+data=rnorm(25,mean=2.5,sd=.45)
+
+```
+
+When putting your two endpoints together, you may find something similar to the following to be useful.
+
+```{r}
+1+c(-1,1)*.25
+```
+
+```{r}
+# apply your function to the data sample 'data'
+
+conf(data,0.02)
+```
+
+
+Now check that your calculation is correct, by using:
+
+```{r}
+t.test(data,conf.level=.98)
+```
+
+
+## Problem 4 (5 pts)
+
+The derivative of a function $f(x)$ at $x$ can be approximated by the Newton's quotient
+
+$$\frac{f(x+h) - f(x-h)}{2 * h}$$
+
+where $h$ is a small number. 
+
+
+Write a function named 'slope' to calculate the Newton's quotient for the function $f(x) = exp(x)$. 
+
+The function should take two scalar arguments, $x$ and $h$. Make sure that your function has a default value of $h=1.e-6$.
+
+Test your function at the point $x=1$ using the default value of $h$, and write a line of code to compare approximate value of the derivative calculated by your function to  the true (theoretical) value of the derivative of $f(x)=e^x$ at $x=1$, which is $f'(1) = e^1$.
+
+
+```{r}
+slope = function(x, h = 1.e-6){
+   quotient = (exp(x+h) - exp(x-h))/(2*h)
+   return(quotient)
+}
+
+# call function to find slope
+slope(1)
+
+# test function
+x=1
+deriv(exp(x), 'x')
+
+```
+
+
+
+## Problem 5 (10 pts)
+
+A very useful feature in R is the ability to pass a function name as an argument.
+
+Here is an example, where we pass  three different function names: $exp(x)$, $log(x)$, and $sin(x)$, to the function 'test' to do calculations that depends on the function choice:
+
+```{r}
+test=function(x,a,f){
+ output=f(x+a)+f(x-a)
+ return(output)
+}
+test(0,2,exp) # this will calculate exp(0+2)+exp(0-2)
+test(20,5,log) # this will calculate log(20+5)+log(20-5)
+test(0,1,sin) # this will calculate sin(0+1)+sin(0-1)
+
+```
+
+
+### 4.1 (4 pts)
+
+Now, modify the function you wrote for problem 4 so that your new function, called 'slopef',  accepts a new argument that is the name of a function of which you want to approximate the derivative.  
+
+The function 'slopef' should also accept
+an argument named $h$ for the 'infinitesimal' step size. Use the same default value as in problem 4 for this argument.
+
+
+```{r}
+# implement your 'slopef' function here
+slopef = function(x,f, h  = 1e-06) {
+  output=(f(x+h)-f(x-h))/(2*h)
+  return(output)
+}
+
+```
+
+
+### 4.2 (3 pts)
+
+When your function is written, use it to approximate the derivative of sin(x) at $x=\pi/4$, of $log(x)$ at $x=3$, and of $exp(x)$ at $x=2$.
+
+
+```{r}
+
+slopef(pi/4,sin)
+slopef(3,log)
+slopef(2,exp)
+
+```
+
+
+### 4.3 (3 pts)
+
+Note that you can easily check that your results are right, because we know the analytical expression of the derivatives of the sin, the log and the exp function.
+
+$$ \frac{d}{dx} (\sin x) = \cos x \\ \frac{d}{dx} (\log x) = \frac{1}{x} \\ \frac{d}{dx} (e^x) = e^{x} \\ $$
+
+Write a code to compute (and print) the 3 values of the derivatives, computed from these analytical expressions
+
+
+```{r}
+
+cos(pi/4)
+1/3
+exp(2)
+
+```
+
+
+## Problem 6 (10 points)
+
+In this problem, you will need to write a code that estimates the empirical coverage of the student t confidence intervals. To do so, proceed exactly as seen in lecture 1 of Module 3. Feel free to copy, paste and adapt the code contained in the Rmd file of this lecture.
+
+Please write your code so as to conform to the following prescriptions:
+
+Use 20 simulations.
+
+In each simulation, use a new sample of size n=10
+Draw your sample from a normal distribution with ('true') mean 15 and ('true') standard deviation 3.
+
+For your plot, which should show each t-confidence interval as a horizontal segment, use xlim =c(10,20) (for Nbatch simulations, one should see Nbatch confidence interval segments in the plot). 
+
+For each simulation, you will use the formula of student to compute a 90% CI, and increment a counter to estimate the empirical coverage.
+
+Write your simulation code:
+
+
+```{r}
+
+Nbatch=20  
+plot(0,0,xlim=c(10,20),ylim=c(0,Nbatch),type="n",  ylab="simulation batch", xlab="when sampling from normal population")
+
+ 
+ n=10       
+ truemean=15; 
+ truesd=3; 
+ 
+ alpha=.1 
+ 
+ cover=0  
+
+for (i in 1:Nbatch) { 
+  
+   data=rnorm(n,truemean,truesd) 
+   estmean = mean(data)
+   estsd   =   sd(data)
+
+   tnx <- qt(1-alpha/2,n-1)
+   
+   tint=estmean + c(-1,1)*tnx*estsd/sqrt(n)
+   
+   count1=ifelse(tint[1]<truemean&&truemean<tint[2],1,0)
+   
+   cover=cover+count1
+   
+   lines(tint,c(i,i)) 
+   
+ }
+ 
+lines(c(truemean,truemean),c(0,Nbatch)) 
+
+ empirical=cover/Nbatch 
+  
+
+```
+
+
+Print the estimate empirical coverage:
+
+
+```{r}
+ print(paste("empirical coverage is ",100*empirical,"%"))
+ 
+```
+
+What does the empirical coverage become when you repeat this exercise, but replace the value n=10 by n=200 AND Nbatch=20 by Nbatch=1000?
+
+
+```{r}
+# copy your code above, but replace n=20 by n=200 
+# and rerun the code
+# print the new estimation of the empirical coverage
+
+Nbatch=1000  
+plot(0,0,xlim=c(10,20),ylim=c(0,Nbatch),type="n",  ylab="simulation batch", xlab="when sampling from normal population")
+ 
+ n=200     
+ 
+ truemean=15; 
+ truesd=3; 
+ 
+ alpha=.1
+ 
+ cover=0   
+
+for (i in 1:Nbatch){ 
+  
+   data=rnorm(n,truemean,truesd) 
+
+   estmean = mean(data)
+   estsd   =   sd(data)
+
+   tnx <- qt(1-alpha/2,n-1)
+   
+   tint=estmean + c(-1,1)*tnx*estsd/sqrt(n)
+   
+   count1=ifelse(tint[1]<truemean&&truemean<tint[2],1,0)
+   
+   cover=cover+count1 
+   
+   lines(tint,c(i,i))
+   
+ } 
+
+
+lines(c(truemean,truemean),c(0,Nbatch)) 
+
+    empirical=cover/Nbatch 
+    
+ print(paste("empirical coverage is ",100*empirical,"%"))
+
+```
+
+
+Empirical coverage seems to get closer to nominal 
+when we increase these parameters (fill with the right word).
